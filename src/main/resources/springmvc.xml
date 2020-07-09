@@ -1,0 +1,83 @@
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+	xmlns:mvc="http://www.springframework.org/schema/mvc"
+	xmlns:tx="http://www.springframework.org/schema/tx"
+	xmlns:tool="http://www.springframework.org/schema/tool"
+	xmlns:aop="http://www.springframework.org/schema/aop"
+	xsi:schemaLocation="
+        http://www.springframework.org/schema/beans
+		http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/context
+		http://www.springframework.org/schema/context/spring-context.xsd
+		http://www.springframework.org/schema/mvc
+		http://www.springframework.org/schema/mvc/spring-mvc.xsd
+		http://www.springframework.org/schema/tx
+		http://www.springframework.org/schema/tx/spring-tx.xsd
+		http://www.springframework.org/schema/tool
+		http://www.springframework.org/schema/tool/spring-tool.xsd
+		http://www.springframework.org/schema/aop  
+		http://www.springframework.org/schema/aop/spring-aop-4.0.xsd">
+ 
+    <!-- 开启controller注解支持 -->
+	<context:component-scan base-package="com.bigDragon.demo.controller,com.bigDragon.concurrent.createThread" use-default-filters="false">
+		<context:include-filter type="annotation" expression="org.springframework.stereotype.Controller" />
+		<context:include-filter type="annotation" expression="org.springframework.web.bind.annotation.ControllerAdvice" />
+	</context:component-scan>
+
+    <!--使用mvc:annotation-driven代替上边注解映射器和注解适配器 配置 如果使用mvc:annotation-driven就不用配置上面的
+        RequestMappingHandlerMapping和RequestMappingHandlerAdapter-->
+	<!-- 默认的注解映射的支持，org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping 
+	<mvc:annotation-driven/>-->
+	
+	<!-- 默认的注解映射的支持 -->
+	<mvc:annotation-driven>
+		<mvc:message-converters>
+			<bean class="org.springframework.http.converter.StringHttpMessageConverter">
+				<property name="supportedMediaTypes">
+					<list>
+						<value>text/html; charset=UTF-8</value>
+						<value>application/json;charset=UTF-8</value>
+					</list>
+				</property>
+			</bean>
+			<bean
+				class="org.springframework.http.converter.json.MappingJackson2HttpMessageConverter">
+				<property name="supportedMediaTypes">
+					<list>
+						<!-- 后台回调信息格式转化为字符串 -->
+						<!-- <value>text/html; charset=UTF-8</value> -->
+						<!-- 后台回调信息格式转化为json格式 -->
+						<value>application/json;charset=UTF-8</value>
+					</list>
+				</property>
+			</bean>
+		</mvc:message-converters>
+	</mvc:annotation-driven>
+	
+	<!-- AOP 注解方式 ；定义Aspect -->
+    <!-- 激活组件扫描功能,在包"com.example.aop及其子包下面自动扫描通过注解配置的组件-->
+    <context:component-scan base-package="com.bigDragon.common.aspect"/>
+    <aop:aspectj-autoproxy proxy-target-class="true" /> 
+	
+    <!-- 配置视图解析器 如何把handler 方法返回值解析为实际的物理视图 -->
+    <bean class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+        <property name = "prefix" value="/WEB-INF/"></property>
+        <property name = "suffix" value = ".jsp"></property>
+    </bean>
+    	<!-- 线程池配置 -->
+	 <bean id="threadPool" class="org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor">  
+      <!-- 核心线程数  -->  
+      <property name="corePoolSize" value="5" />  
+      <!-- 最大线程数 -->  
+      <property name="maxPoolSize" value="30" />  
+      <!-- 队列最大长度 >=mainExecutor.maxSize -->  
+      <property name="queueCapacity" value="500" />  
+      <!-- 线程池维护线程所允许的空闲时间 -->  
+      <property name="keepAliveSeconds" value="200" />  
+      <!-- 线程池对拒绝任务(无线程可用)的处理策略 -->  
+      <property name="rejectedExecutionHandler">  
+        <bean class="java.util.concurrent.ThreadPoolExecutor$CallerRunsPolicy" />  
+      </property>  
+    </bean>
+</beans>
